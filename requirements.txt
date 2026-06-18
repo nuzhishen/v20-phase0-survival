@@ -1,0 +1,3 @@
+-r day01_schema_fastapi/requirements.txt
+-r day02_llm_budget/requirements.txt
+

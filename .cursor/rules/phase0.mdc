@@ -1,0 +1,27 @@
+---
+description: V20 Phase 0 survival-week engineering boundaries
+alwaysApply: true
+---
+
+# Repository model
+
+- Keep one Phase 0 repository with one directory per day.
+- Keep Day 1 through Day 5 independently runnable.
+- Put cross-day integration in Day 6.
+
+# Scope
+
+- Do not add WebSocket; use SSE only in later phases when streaming is required.
+- Do not add LangGraph, MCP, Redis, frontend code, dashboards, or platform services.
+- Day 3 must contain a manually designed and explainable ReAct core loop.
+- Day 4 is limited to chunk, embed, upsert, search, and top-k retrieval.
+- Day 5 compares dense retrieval with hybrid retrieval and reranking.
+
+# Quality
+
+- Reject unknown fields and unsafe implicit coercion.
+- Add tests for every validation or behavior change.
+- Keep handlers thin and contracts explicit.
+- Run each day's tests from that day's directory to avoid `app` package collisions.
+- Do not generate production Harness decisions without explicit engineer-defined policies and tradeoffs.
+

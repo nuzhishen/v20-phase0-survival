@@ -1,0 +1,14 @@
+flowchart LR
+  A["LLM Request"] --> B["Estimate Tokens"]
+  B --> C{"Pre-flight Budget"}
+  C -- "reject" --> D["BudgetExceeded"]
+  C -- "allow" --> E["Provider Call"]
+  E --> F{"finish_reason"}
+  F -- "stop" --> G["Parse Content"]
+  F -- "tool_calls" --> H["Validate Tool Args / Permission / Idempotency"]
+  F -- "length" --> I["TruncationError -> Compress / Fallback / HITL"]
+  F -- "content_filter" --> J["Safety Branch"]
+  F -- "unknown" --> K["ProtocolError"]
+  G --> L["Record Actual Usage"]
+  H --> L
+

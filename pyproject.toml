@@ -1,0 +1,9 @@
+[project]
+name = "v20-phase0-survival"
+version = "0.1.0"
+description = "V20 Phase 0 survival-week prototypes and integration pass test"
+requires-python = ">=3.11"
+
+[tool.pyright]
+typeCheckingMode = "basic"
+

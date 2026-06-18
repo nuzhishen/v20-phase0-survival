@@ -1,0 +1,56 @@
+---
+title: "LLM调用错误 - Retry分类决策树"
+---
+flowchart TD
+    START([LLM调用返回错误/异常响应]) --> CHECK_FR{检查 finish_reason}
+
+    CHECK_FR -->|finish_reason = length| LENGTH[❌ TruncationError上下文截断]
+    CHECK_FR -->|finish_reason = content_filter| CF[⚠️ ContentFilterError安全审查触发]
+    CHECK_FR -->|finish_reason = stop/tool_calls但有其他错误| ERR{判断错误类型}
+    CHECK_FR -->|无响应/网络错误| NET{判断错误类型}
+
+    LENGTH --> NR1[❌ 不可重试NonRetryable]
+    NR1 --> FB1[触发 Fallback→ 规则引擎→ 标记需人工复核]
+
+    CF --> NR2[❌ 不可重试NonRetryable]
+    NR2 --> LOG[记录安全审计日志返回合规拒绝提示]
+
+    ERR -->|HTTP 429| R429[✅ 可重试]
+    ERR -->|HTTP 500/502/503| R5xx[✅ 可重试]
+    ERR -->|HTTP 400| NR3[❌ 不可重试]
+    ERR -->|HTTP 401/403| NR4[❌ 不可重试]
+
+    NET -->|Timeout > 30s| RTO[✅ 可重试]
+    NET -->|ConnectionError| R5xx
+
+    R429 --> EXP[指数退避  1s → 2s → 4s  + Jitter +-百分之10  最多3次]
+    R5xx -->|503| EXP
+    R5xx -->|500/502| LIN[线性退避2s → 4s最多2次]
+
+    RTO --> IMM[立即重试1次]
+
+    NR3 --> FAIL[直接失败记录参数错误日志]
+    NR4 --> ALERT[触发告警API Key 异常通知运维]
+
+    EXP --> CHKR{重试是否成功?}
+    LIN --> CHKR
+    IMM --> CHKR
+
+    CHKR -->|成功| OK([✅ 正常返回])
+    CHKR -->|达到最大重试次数| CB{检查熔断器状态}
+
+    CB -->|Close 状态| TRIP[触发熔断Circuit Breaker Open切换备用模型]
+    CB -->|已 Open| TRIP
+    TRIP --> SWITCH[路由切换DeepSeek → Qwen → 规则引擎兜底]
+
+    style LENGTH fill:#ff6b6b,color:#fff
+    style CF fill:#ffa500,color:#fff
+    style NR1 fill:#ff6b6b,color:#fff
+    style NR2 fill:#ffa500,color:#fff
+    style NR3 fill:#ff6b6b,color:#fff
+    style NR4 fill:#ff6b6b,color:#fff
+    style R429 fill:#51cf66,color:#fff
+    style R5xx fill:#51cf66,color:#fff
+    style RTO fill:#51cf66,color:#fff
+    style OK fill:#51cf66,color:#fff
+    style SWITCH fill:#339af0,color:#fff

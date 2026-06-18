@@ -1,0 +1,66 @@
+---
+title: "LLM调用完整时序图（含预算检查 + finish_reason校验）"
+---
+sequenceDiagram
+    participant Agent as TMS Agent
+    participant Budget as TokenBudget
+    participant Factory as ProviderFactory
+    participant Provider as LLMProvider<br/>(DeepSeek/Qwen)
+    participant LLM as LLM API
+    participant Ledger as TokenLedger
+    participant Fallback as 规则引擎
+
+    Agent->>Budget: pre_check(estimated_tokens)
+    alt 预算不足
+        Budget-->>Agent: ❌ BudgetExceededError
+        Agent->>Agent: 触发紧急通知，拒绝任务
+    else 预算充足
+        Budget-->>Agent: ✅ 允许继续
+
+        Agent->>Factory: get(model_name)
+        Factory-->>Agent: LLMProvider实例
+
+        Agent->>Provider: chat_completion(LLMRequest)
+        Provider->>Provider: 构建 messages（System+History+Query+Tools）
+
+        Provider->>LLM: HTTP POST /chat/completions
+        LLM-->>Provider: 原始HTTP响应
+
+        Provider->>Provider: 解析响应
+        Provider->>Provider: 校验 finish_reason
+
+        alt finish_reason = "stop" 或 "tool_calls"
+            Provider-->>Agent: ✅ LLMResponse(content, usage, finish_reason)
+            Agent->>Budget: charge(usage)
+            Agent->>Ledger: record(request_id, model, usage, finish_reason)
+            Ledger-->>Agent: ✅ 记录完成
+            Agent->>Agent: 正常处理响应
+
+        else finish_reason = "length"
+            Provider-->>Agent: ❌ TruncationError (NonRetryable)
+            Agent->>Fallback: execute_rule(device_id, error_code)
+            Fallback-->>Agent: 确定性规则建议
+            Agent->>Ledger: record(request_id, "truncation", usage)
+            Agent->>Agent: 标记任务为 FALLBACK_RULE_APPLIED
+
+        else finish_reason = "content_filter"
+            Provider-->>Agent: ⚠️ ContentFilterError (NonRetryable)
+            Agent->>Ledger: record(request_id, "content_filter", usage)
+            Agent->>Agent: 返回安全拒绝提示
+
+        else HTTP 429 / 5xx
+            Provider-->>Agent: ❌ RetryableError
+            loop 指数退避重试（最多3次）
+                Agent->>Provider: chat_completion(同一请求)
+                Provider->>LLM: 重试HTTP请求
+                LLM-->>Provider: 响应
+            end
+            alt 重试成功
+                Provider-->>Agent: ✅ LLMResponse
+            else 重试耗尽
+                Provider-->>Agent: ❌ ProviderUnavailableError
+                Agent->>Factory: get(fallback_model)
+                note over Agent,Factory: 切换到备用模型（Qwen/通义）
+            end
+        end
+    end

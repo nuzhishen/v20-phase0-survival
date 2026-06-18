@@ -1,0 +1,25 @@
+sequenceDiagram
+  participant User as Caller
+  participant Factory as ProviderFactory
+  participant Budget as TokenBudget
+  participant Provider as MockProvider
+  participant Finish as finish_reason Validator
+  participant Ledger as TokenLedger
+
+  User->>Factory: get(model_name)
+  Factory-->>User: provider
+  User->>Provider: chat_completion(LLMRequest)
+  Provider->>Budget: require_budget(estimated_cost)
+  alt budget exceeded
+    Budget-->>User: BudgetExceededError
+  else budget allowed
+    Provider->>Finish: classify_finish_reason(response)
+    alt finish_reason=length
+      Finish-->>User: TruncationError
+    else stop/tool_calls
+      Provider->>Budget: charge(usage)
+      Provider->>Ledger: record(request_id, model, usage)
+      Provider-->>User: LLMResponse
+    end
+  end
+

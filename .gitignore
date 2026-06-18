@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+.coverage
+htmlcov/
+.idea/
+.env
+
+# Local vector database and generated reports
+qdrant_storage/
+artifacts/
+

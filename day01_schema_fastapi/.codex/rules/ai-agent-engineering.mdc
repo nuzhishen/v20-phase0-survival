@@ -1,0 +1,19 @@
+---
+description: Phase 0 AI Agent engineering constraints
+alwaysApply: true
+---
+
+# Scope
+
+- Keep Day 1 limited to FastAPI, Pydantic schemas, tests, and documentation.
+- Do not add RAG, LangGraph, MCP, SSE, frontend code, or production Harness mechanisms.
+- Do not add fields that are not required by the business schema.
+
+# Engineering rules
+
+- Every schema constraint must have an automated test.
+- Reject unknown fields and unsafe implicit type coercion.
+- Keep route handlers thin; validation belongs in Pydantic models.
+- Core Harness decisions such as checkpoint granularity, retry trees,
+  circuit-breaker thresholds, fallback triggers, and tool permissions must be
+  designed and explainable by the engineer, not blindly generated.
