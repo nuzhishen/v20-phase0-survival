@@ -43,6 +43,23 @@ v20-phase0-survival/
 - Day 3 到 Day 6 已创建可继续开发的目录骨架。
 - 源目录 `C:\ai\day-001` 和 `C:\ai\day-002` 保持不变。
 
+## 换账号接续
+
+如果切换 Codex 登录账号，不依赖左侧历史会话或账号记忆接续项目。新的账号应从以下项目内文件恢复上下文：
+
+- `AGENTS.md`：Phase 0 的强约束、每日边界和工程规则。
+- `docs\account_switch_handoff.md`：账号切换后的接续入口、GitHub 仓库、验证命令和禁止复制项。
+- `docs\migration_manifest.md`：Day 1、Day 2 的来源、提交和迁移范围。
+- `day02_llm_budget\docs\day02_handoff_summary.md`：Day 2 给后续开发的交接总结。
+
+当前主仓库已经托管在 GitHub：
+
+```text
+https://github.com/nuzhishen/v20-phase0-survival
+```
+
+换账号后优先从 GitHub clone 或打开本地 `C:\ai\codex\v20-phase0-survival`，再读取上述文档继续开发。
+
 ## 环境
 
 建议在仓库根目录使用一个虚拟环境：
@@ -77,4 +94,3 @@ Pop-Location
 - Day 3 的 ReAct 决策循环必须能脱离框架解释。
 - Day 4 只跑通最小 RAG 链路。
 - Harness 核心策略必须由工程师设计并能解释权衡。
-
