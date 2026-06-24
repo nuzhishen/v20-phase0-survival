@@ -9,7 +9,8 @@ if (-not (Test-Path -LiteralPath $python -PathType Leaf)) {
 
 $projects = @(
     "day01_schema_fastapi",
-    "day02_llm_budget"
+    "day02_llm_budget",
+    "day03_react_loop"
 )
 
 foreach ($project in $projects) {
@@ -26,4 +27,3 @@ foreach ($project in $projects) {
         Pop-Location
     }
 }
-
