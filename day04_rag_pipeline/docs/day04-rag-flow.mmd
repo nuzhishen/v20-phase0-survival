@@ -1,0 +1,30 @@
+flowchart TD
+    A["Markdown Corpus<br/>TMS / OTT / Elderly"] --> B["Load<br/>documents.py"]
+    B --> C{"Chunk Strategy"}
+    C --> C1["MarkdownChunker<br/>TMS error-code sections"]
+    C --> C2["QAChunker<br/>OTT Q/A pairs"]
+    C --> C3["FixedChunker<br/>Elderly fixed + sentence boundary"]
+    C1 --> D["ChunkPayload<br/>chunk_id / domain / source / metadata"]
+    C2 --> D
+    C3 --> D
+
+    D --> E{"EmbeddingProvider"}
+    E --> E1["MockEmbedding<br/>deterministic local baseline"]
+    E --> E2["BGEEmbedding<br/>WSL sentence-transformers"]
+
+    E1 --> F{"VectorStore"}
+    E2 --> F
+    F --> F1["QdrantRAGClient<br/>REST + HNSW m=16 ef_construct=100"]
+    F --> F2["InMemoryVectorStore<br/>test and fallback"]
+
+    F1 --> G["Payload Index<br/>domain keyword"]
+    G --> H["Retriever.retrieve<br/>query -> embed -> search -> top_k"]
+    F2 --> H
+
+    H --> I["RetrievalResponse<br/>results / scores / latency / low_confidence"]
+    I --> J["Evaluate<br/>Recall@K / MRR / Context Precision / No-answer"]
+
+    J --> K["rag_baseline_report.md<br/>Day 4 dense baseline"]
+
+    I -. "Day 6 integration only" .-> L["Day 3 ReAct lookup_error_knowledge<br/>evidence input, not generated answer"]
+    K -. "Day 5 next step" .-> M["Hybrid Retrieval + Reranker<br/>not implemented on Day 4"]

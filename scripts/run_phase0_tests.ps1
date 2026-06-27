@@ -1,16 +1,22 @@
 $ErrorActionPreference = "Stop"
 
+# Run each daily project in its own working directory.
+# This avoids cross-day imports between separate top-level app packages.
 $root = Split-Path -Parent $PSScriptRoot
 $python = Join-Path $root ".venv\Scripts\python.exe"
 
+# Prefer the repository virtualenv; fall back to system Python when needed.
 if (-not (Test-Path -LiteralPath $python -PathType Leaf)) {
     $python = (Get-Command python -ErrorAction Stop).Source
 }
 
+# Phase 0 is currently integrated through Day 4 only.
+# Add Day 5 and Day 6 after those independent projects are complete.
 $projects = @(
     "day01_schema_fastapi",
     "day02_llm_budget",
-    "day03_react_loop"
+    "day03_react_loop",
+    "day04_rag_pipeline"
 )
 
 foreach ($project in $projects) {
