@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
+import subprocess
 import sys
 
 
@@ -53,9 +55,55 @@ def _build_fallback_store(
     return fallback
 
 
+def _load_api_key_from_wsl_env() -> str | None:
+    """从 WSL 的 qdrant.env 读取管理员 API Key。
+
+    用户的 Qdrant 跑在 WSL，密钥保存在 `~/qdrant/qdrant.env`。
+    这里用子进程只读取一行值，不打印、不落盘，避免把 secret 写进仓库。
+    如果当前机器没有 WSL 或文件不存在，返回 None，让调用方给出明确提示。
+    """
+
+    command = [
+        "wsl",
+        "-e",
+        "sh",
+        "-lc",
+        "if [ -f ~/qdrant/qdrant.env ]; then "
+        "grep '^QDRANT_API_KEY=' ~/qdrant/qdrant.env | head -n 1 | cut -d= -f2-; "
+        "fi",
+    ]
+    completed = subprocess.run(
+        command,
+        capture_output=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        return None
+    api_key = completed.stdout.decode("utf-8", errors="replace").strip()
+    return api_key or None
+
+
+def _resolve_api_key(explicit_api_key: str | None) -> str | None:
+    """按优先级解析 Qdrant API Key。
+
+    优先级：
+    1. 命令行 `--api-key`，适合临时验证。
+    2. Windows 当前进程环境变量 `QDRANT_API_KEY`。
+    3. WSL 文件 `~/qdrant/qdrant.env`。
+    """
+
+    if explicit_api_key:
+        return explicit_api_key
+    env_api_key = os.getenv("QDRANT_API_KEY")
+    if env_api_key:
+        return env_api_key
+    return _load_api_key_from_wsl_env()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Phase 0 Day 4 Qdrant smoke test")
     parser.add_argument("--url", default=None, help="Qdrant URL，默认读取 QDRANT_URL 或 localhost")
+    parser.add_argument("--api-key", default=None, help="Qdrant API Key；默认读取环境变量或 WSL qdrant.env")
     parser.add_argument("--collection", default="phase0_day4_context_smoke", help="测试 collection 名称")
     parser.add_argument("--embedder", choices=["mock", "bge"], default="mock", help="选择 Mock 或 BGE 向量")
     parser.add_argument("--top-k", type=int, default=3, help="每条 smoke query 返回几条结果")
@@ -67,6 +115,7 @@ def main() -> int:
 
     qdrant = QdrantRAGClient(
         url=args.url,
+        api_key=_resolve_api_key(args.api_key),
         collection_name=args.collection,
         timeout_seconds=30,
     )
@@ -83,6 +132,12 @@ def main() -> int:
         qdrant.upsert_chunks(chunks, embeddings)
     except QdrantClientError as error:
         print(f"Qdrant smoke failed before search: {error}", file=sys.stderr)
+        if "401" in str(error):
+            print(
+                "提示：当前 Qdrant 启用了 API Key。请设置 QDRANT_API_KEY，"
+                "或确认 WSL 中 ~/qdrant/qdrant.env 存在 QDRANT_API_KEY。",
+                file=sys.stderr,
+            )
         return 2
 
     queries = [

@@ -39,9 +39,19 @@ Qdrant API Key 不写入仓库，运行前从环境变量读取：
 
 ```powershell
 cd C:\ai\codex\v20-phase0-survival\day04_rag_pipeline
-$env:QDRANT_URL = "http://localhost:6333"
-$env:QDRANT_API_KEY = (wsl -e sh -lc "grep '^QDRANT_API_KEY=' ~/qdrant/qdrant.env | cut -d= -f2-")
 ..\.venv\Scripts\python.exe run_day04_qdrant_smoke.py --embedder mock
+```
+
+脚本会按以下优先级读取 API Key：
+
+1. 命令行 `--api-key`
+2. Windows 当前进程环境变量 `QDRANT_API_KEY`
+3. WSL 文件 `~/qdrant/qdrant.env`
+
+如果要强制指定局域网地址：
+
+```powershell
+..\.venv\Scripts\python.exe run_day04_qdrant_smoke.py --embedder mock --url http://192.168.28.151:6333
 ```
 
 如果要验证真实 BGE 向量：

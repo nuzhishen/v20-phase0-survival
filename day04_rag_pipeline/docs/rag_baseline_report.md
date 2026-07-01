@@ -1,6 +1,6 @@
 # Day 4 RAG Baseline Report
 
-- 生成时间：2026-06-27T20:30:22
+- 生成时间：2026-07-01T21:35:17
 - 运行方式：`python run_day04_eval.py`
 - 默认链路：`MockEmbedding -> InMemoryVectorStore -> Retriever -> 8 metrics`
 - 真实 Qdrant/BGE：通过 `run_day04_qdrant_smoke.py` 单独验证，避免单元测试依赖外部服务。

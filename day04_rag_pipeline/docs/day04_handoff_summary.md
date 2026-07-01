@@ -44,9 +44,27 @@ Qdrant：
 
 - 本机默认 URL：`http://localhost:6333`
 - 局域网 URL：`http://192.168.28.151:6333`
-- API Key 不写仓库，运行时从环境变量读取。
+- API Key 不写仓库，运行时动态读取。
 - collection 默认 smoke 名称：`phase0_day4_context_smoke`
 - 已验证 Mock + Qdrant smoke：TMS/OTT/养老均返回非低置信 Top-K。
+- 2026-07-01 修复：直接运行 smoke 脚本时，如果 Windows PowerShell 没有 `QDRANT_API_KEY`，旧逻辑会触发 Qdrant `401`。
+- 当前 `run_day04_qdrant_smoke.py` 的 API Key 读取优先级：
+  1. 命令行 `--api-key`
+  2. Windows 当前进程环境变量 `QDRANT_API_KEY`
+  3. WSL 文件 `~/qdrant/qdrant.env`
+
+推荐验证命令：
+
+```powershell
+cd C:\ai\codex\v20-phase0-survival\day04_rag_pipeline
+..\.venv\Scripts\python.exe run_day04_qdrant_smoke.py --embedder mock
+```
+
+强制走局域网地址：
+
+```powershell
+..\.venv\Scripts\python.exe run_day04_qdrant_smoke.py --embedder mock --url http://192.168.28.151:6333
+```
 
 BGE：
 
@@ -55,6 +73,12 @@ BGE：
 - 真实向量验证使用 `run_day04_qdrant_smoke.py --embedder bge`。
 - 已验证中文 BGE 向量：512 维。
 - 已验证 BGE + Qdrant smoke：collection `phase0_day4_context_bge_smoke` 可写入并检索。
+
+真实 BGE 验证命令：
+
+```powershell
+..\.venv\Scripts\python.exe run_day04_qdrant_smoke.py --embedder bge --collection phase0_day4_context_bge_smoke
+```
 
 ## 下轮建议
 
