@@ -8,7 +8,6 @@ from app.rag.hybrid_retriever import HybridRetriever
 from app.rag.reranker import BGEReranker, FallbackReranker, MockReranker
 from app.rag.sparse_retriever import SparseRetriever, tokenize_for_sparse
 
-
 def test_tokenizer_preserves_error_codes_versions_and_numbers() -> None:
     tokens = tokenize_for_sparse("OTA_TIMEOUT Android 11 TMS-GD-100 播放地址403 /data 300MB")
 

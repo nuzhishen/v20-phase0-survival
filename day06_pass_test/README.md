@@ -1,5 +1,13 @@
 # Day 06: Phase 0 Pass Test
 
+开始 Day 6 前先读：
+
+- `docs/day05_to_day06_handoff.md`
+- `day05_hybrid_rerank/docs/hybrid_vs_dense_report.md`
+- `day05_hybrid_rerank/docs/day05-what-blocked.md`
+
+Day 6 只负责集成：把 Day 5 推荐检索配置 `Best Hybrid + MockReranker (Hybrid alpha=0.6)` 作为证据层接入 Day 3 手写 ReAct 流程，不继续扩展 Query Rewrite、GraphRAG、LangGraph 或前端。
+
 ## 固定输入
 
 ```text
@@ -32,4 +40,3 @@
 ## 淘汰标准
 
 无法完成 ReAct 核心循环，或无法解释决策与安全边界时，Phase 0 不通过。
-

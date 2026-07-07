@@ -41,7 +41,9 @@ v20-phase0-survival/
 - Day 1 源码、测试、文档、规则和仓库外层学习资料已迁入。
 - Day 2 源码、测试、Prompt、报告、文档和 IDE 配置已迁入。
 - Day 3 规则版最小 ReAct 状态机、测试、准确率报告和阻塞记录已完成。
-- Day 4 到 Day 6 已创建可继续开发的目录骨架。
+- Day 4 最小 RAG Pipeline 已完成。
+- Day 5 Hybrid Retrieval + Reranker 对比实验已完成。
+- Day 6 保留为全链路通关集成目录。
 - 源目录 `C:\ai\day-001` 和 `C:\ai\day-002` 保持不变。
 
 ## 换账号接续
@@ -53,6 +55,7 @@ v20-phase0-survival/
 - `docs\migration_manifest.md`：Day 1、Day 2 的来源、提交和迁移范围。
 - `day02_llm_budget\docs\day02_handoff_summary.md`：Day 2 给后续开发的交接总结。
 - `docs\day03_to_day04_handoff.md`：Day 4 新会话接续说明和 Day 3 验收基线。
+- `docs\day05_to_day06_handoff.md`：Day 6 新会话接续说明、Day 5 验证命令、源码入口和最终检索配置。
 
 当前主仓库已经托管在 GitHub：
 
@@ -74,6 +77,7 @@ python -m venv .venv
 Day 1 和 Day 2 都使用顶层包名 `app`，因此测试必须在各自目录的独立进程中运行：
 
 Day 3 也使用独立顶层 `app` 包，跨日验证脚本会分别进入各自目录运行。
+Day 4 和 Day 5 也按相同方式由跨日脚本分目录运行。
 
 ```powershell
 .\scripts\run_phase0_tests.ps1

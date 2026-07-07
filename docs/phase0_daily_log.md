@@ -54,9 +54,25 @@ ReAct 不是 Prompt，而是状态机。生产级 Agent 必须显式控制 Thoug
 
 ### 今天做出来什么？
 
+完成 Day 5 Hybrid Retrieval + Reranker 对比实验：
+
+- 复用 Day 4 的 30 条 Query 和语料，不覆盖 Day 4 Dense baseline。
+- 实现本地 `MockDenseRetriever`，保持 Day 4 n-gram/hash 口径。
+- 实现本地 BM25 Sparse，保留错误码、版本号、设备型号、英文 token、数字和中文 n-gram。
+- 实现 Weighted、Linear、RRF 三种融合策略。
+- 实现 `HybridRetriever` 统一入口。
+- 实现 `MockReranker`、`BGEReranker` 占位和 `FallbackReranker`。
+- 跑完 Dense、Sparse、5 组 alpha、RRF、Best Hybrid + MockReranker 对比。
+- 生成 `hybrid_vs_dense_report.md` 和 `day05-what-blocked.md`。
+- Day 5 单测 10 条通过，并纳入 Phase 0 总测试脚本。
+
 ### 今天学到了什么？
 
+Dense 不能独立承担 TMS 场景全部召回，因为错误码、Android 版本、设备型号、CDN、NTP、403 等精确符号更适合 Sparse/BM25。Hybrid 权重不能拍脑袋，必须用同一评测集做 grid search。Reranker 只能重排候选 TopN，不能救回第一阶段没召回的正确 chunk。
+
 ### 今天什么没做出来？
+
+没有把真实 BGE-Reranker 作为默认路径；当前默认使用 MockReranker 兜底。没有做 Query Rewrite、GraphRAG 或 ReAct 深集成，因为它们会污染 Dense vs Hybrid 对照实验或越过 Day 5 边界。Day 6 再负责把 Day 5 检索证据接入 Day 3 手写 ReAct 流程。
 
 ## Day 6
 
