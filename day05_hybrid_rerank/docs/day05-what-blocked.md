@@ -1,6 +1,6 @@
 # Day 5 阻塞记录与晚间复盘
 
-- 生成时间：2026-07-03T19:24:47
+- 生成时间：2026-07-07T21:53:03
 - 运行方式：`python -m app.rag.compare_eval`
 - Git 提交 ID：提交后以 `git log -1 --oneline` 为准。
 
