@@ -34,7 +34,7 @@ v20-phase0-survival/
 | Day 3 | 手写 ReAct 决策循环 | 核心循环不依赖 Agent 框架 |
 | Day 4 | 切片、Embedding、Upsert、Search、Top-K | 不做复杂 RAG 平台或 GraphRAG |
 | Day 5 | Dense + Sparse + Reranker 对比 | 基于 Day 4 结果做可量化实验 |
-| Day 6 | RAG -> ReAct -> Tool -> DiagnosisResult | 固定输入、结构化输出、证据、HITL |
+| Day 6 | RAG -> ReAct -> Tool -> DiagnosisResult | 10 条通关样例、结构化输出、证据、HITL、失败降级 |
 
 ## 当前迁移状态
 
@@ -43,7 +43,7 @@ v20-phase0-survival/
 - Day 3 规则版最小 ReAct 状态机、测试、准确率报告和阻塞记录已完成。
 - Day 4 最小 RAG Pipeline 已完成。
 - Day 5 Hybrid Retrieval + Reranker 对比实验已完成。
-- Day 6 保留为全链路通关集成目录。
+- Day 6 ReAct + RAG + Tool Calling 全链路通关集成已完成。
 - 源目录 `C:\ai\day-001` 和 `C:\ai\day-002` 保持不变。
 
 ## 换账号接续

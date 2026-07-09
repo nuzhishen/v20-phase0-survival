@@ -10,14 +10,15 @@ if (-not (Test-Path -LiteralPath $python -PathType Leaf)) {
     $python = (Get-Command python -ErrorAction Stop).Source
 }
 
-# Phase 0 is currently integrated through Day 5.
-# Add Day 6 after the pass-test project is complete.
+# Phase 0 is integrated through Day 6. Each day still runs in its own
+# process so top-level `app` packages do not collide.
 $projects = @(
     "day01_schema_fastapi",
     "day02_llm_budget",
     "day03_react_loop",
     "day04_rag_pipeline",
-    "day05_hybrid_rerank"
+    "day05_hybrid_rerank",
+    "day06_pass_test"
 )
 
 foreach ($project in $projects) {

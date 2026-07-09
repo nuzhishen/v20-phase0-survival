@@ -1,5 +1,7 @@
 # Day 06: Phase 0 Pass Test
 
+当前状态：已完成。
+
 开始 Day 6 前先读：
 
 - `docs/day05_to_day06_handoff.md`
@@ -40,3 +42,25 @@ Day 6 只负责集成：把 Day 5 推荐检索配置 `Best Hybrid + MockReranker
 ## 淘汰标准
 
 无法完成 ReAct 核心循环，或无法解释决策与安全边界时，Phase 0 不通过。
+
+## 当前实现入口
+
+```powershell
+cd C:\ai\codex\v20-phase0-survival\day06_pass_test
+..\.venv\Scripts\python.exe -m app.demo.survival_gate
+..\.venv\Scripts\python.exe -m pytest -q
+```
+
+当前验证结果：
+
+```text
+Demo: total_cases=10, passed_cases=10
+pytest: 9 passed
+```
+
+报告文件：
+
+- `docs/day06-survival-gate-report.md`
+- `docs/day06-elimination-review.md`
+- `docs/day06-demo-script.md`
+- `docs/day06-architecture.md`
