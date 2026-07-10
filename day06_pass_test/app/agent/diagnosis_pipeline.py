@@ -251,12 +251,12 @@ def calculate_metrics(outcomes: list[GateCaseOutcome]) -> GateMetrics:
     rag_hits = sum(
         1
         for item in rag_cases
-        if item.case.expected_chunk_id in {ref.chunk_id for ref in item.result.rag_references}
+        if item.result is not None and item.case.expected_chunk_id in {ref.chunk_id for ref in item.result.rag_references}
     )
     tool_cases = [item for item in outcomes if item.result is not None]
     tool_correct = sum(1 for item in tool_cases if _actions_match(item))
     hitl_cases = [item for item in outcomes if item.result is not None]
-    hitl_correct = sum(1 for item in hitl_cases if item.result.require_hitl == item.case.expect_hitl)
+    hitl_correct = sum(1 for item in hitl_cases if item.result is not None and item.result.require_hitl == item.case.expect_hitl)
     fallback_cases = [item for item in outcomes if item.case.expect_fallback and item.result is not None]
     fallback_correct = sum(1 for item in fallback_cases if _fallback_matches(item))
     explanation_complete = sum(1 for item in outcomes if _has_explanation(item))

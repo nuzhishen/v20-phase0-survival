@@ -53,6 +53,7 @@ v20-phase0-survival/
 - `AGENTS.md`：Phase 0 的强约束、每日边界和工程规则。
 - `docs\account_switch_handoff.md`：账号切换后的接续入口、GitHub 仓库、验证命令和禁止复制项。
 - `docs\migration_manifest.md`：Day 1、Day 2 的来源、提交和迁移范围。
+- `docs\phase0_w1_handoff_to_phase1_p2.md`：Phase 0 Day1-Day6 总交接、通关结论，以及 Phase 1 / P2 Context Engine 的执行边界。
 - `day02_llm_budget\docs\day02_handoff_summary.md`：Day 2 给后续开发的交接总结。
 - `docs\day03_to_day04_handoff.md`：Day 4 新会话接续说明和 Day 3 验收基线。
 - `docs\day05_to_day06_handoff.md`：Day 6 新会话接续说明、Day 5 验证命令、源码入口和最终检索配置。
