@@ -201,6 +201,63 @@ P2 是：
 
 ## 9. P2 项目启动建议
 
+### 9.1 技术路线评估与最终决策
+
+结合 V20 完整计划、Phase0 Day1-Day6 实际产物和 P2 的 W2-W3 训练目标，最终建议是：
+
+```text
+新启一个 P2 独立项目，采用 Java + Python 双模块。
+不要继续在 Phase0 的 d1-d6 目录上扩写。
+不要做纯 Python 项目。
+不要做纯 Java 重写 RAG 项目。
+```
+
+判断依据：
+
+| 方案 | 优点 | 问题 | 裁定 |
+|---|---|---|---|
+| 继续在 Phase0 / Day1-Day6 基础上扩写 | 启动最快，能复用已有 Python RAG 和 ReAct 原型 | 会污染 Phase0 生存筛选仓库；Day1-Day6 多个顶层 `app` 包已经是独立原型；P2 会倒灌进 P0，后续难以讲清边界 | 不采用 |
+| 新启纯 Python 项目 | 复用 Day4/Day5/Day6 成本低；RAG/RAGAS/Hybrid/Reranker 生态顺手 | 无法体现 W2 明确要求的 Spring AI；削弱“Java 存量系统如何集成 AI”的差异化；面试容易被看成 Python RAG Demo | 不采用 |
+| 新启纯 Java 项目 | 强化 Java 背景，符合 Spring AI 学习目标 | RAGAS、Hybrid/Reranker、快速实验和评估会低效；容易把两周时间耗在重写 Python 已验证能力上；不利于 W2-W3 交付稳定 Demo | 不采用 |
+| 新启 Java + Python 双模块项目 | Java 负责 Spring AI 企业入口和网关；Python 负责 Context Runtime、RAG、Hybrid、Reranker、RAGAS、安全网关；能承接 Phase0 成果，也能强化 Java 差异化 | 需要控制模块边界，避免变成平台化项目 | 采用 |
+
+最终架构判断：
+
+```text
+Java = 企业接入面 / Spring AI / Controller / Swagger / 调用 Python Context Runtime
+Python = Context Engine 核心 / RAG / Hybrid / Reranker / RAGAS / Prompt 注入防御 / Session Context
+Qdrant = 向量库
+Redis = Session / 短期上下文
+Docker Compose = 一键演示环境
+```
+
+这条路线最符合 V20 的主叙事：
+
+```text
+Java 负责企业级接入与治理，Python 负责 AI Runtime / Context Runtime。
+```
+
+P2 的面试卖点不是“我又做了一个 RAG Demo”，而是：
+
+```text
+我把 Java 存量系统接入 AI Context Engine：
+Spring AI 负责企业入口，Python Runtime 负责检索、评估、安全和上下文处理。
+两者通过 REST/gRPC 解耦，既保留 Java 工程优势，也利用 Python AI 生态效率。
+```
+
+### 9.2 为什么不能继续写在 Phase0 仓库里
+
+Phase0 仓库的定位已经完成：
+
+- Day1-Day6 是生存筛选周原型，不是 P2 正式工程。
+- Day1-Day6 都有独立边界，且多个目录使用顶层 `app` 包，继续叠加 P2 会增加导入冲突和测试混乱。
+- Phase0 的价值是保留可回溯基线：Day4 Dense、Day5 Hybrid、Day6 Survival Gate。
+- P2 需要独立 README、Docker Compose、架构图和演示脚本，便于后续进入 P1/P3 时讲清三项目关系。
+
+因此，P2 只复用 Phase0 的设计结论和少量数据/评估思路，不直接复制整个 Phase0 原型。
+
+### 9.3 P2 推荐仓库结构
+
 建议新建正式目录，不在 Phase 0 仓库里继续堆正式项目：
 
 ```text
@@ -222,6 +279,60 @@ v20-p2-context-engine/
   docker-compose.yml
 ```
 
+模块职责：
+
+| 模块 | 语言 | 职责 | 明确不做 |
+|---|---|---|---|
+| `java-context-gateway` | Java / Spring Boot / Spring AI | 企业入口、Swagger、ChatClient/Advisor/RAG 调用样例、调用 Python Context Runtime、记录 REST vs gRPC 延迟 | 不做复杂后台、不做 Admin Dashboard、不做完整 P3 Control Plane |
+| `python-context-runtime` | Python | RAG Pipeline、Hybrid Retrieval、Reranker、RAGAS、自定义评估、Prompt 注入防御、Redis Session Context | 不做完整 Agent Runtime、不做 LangGraph 深集成、不做 P1 Harness |
+| `data/` | 文档数据 | OTT FAQ、养老健康档案/指南、TMS 运维手册 | 不引入真实敏感个人信息 |
+| `eval/` | 评估资产 | OTT10 + 养老10 + 设备10 的评估集、攻击 Prompt、结果报告 | 不做 Eval Gate 平台 |
+| `docs/` | 文档 | 架构图、W2/W3 日志、效果评估报告、面试话术 | 不写营销页 |
+
+### 9.4 W2-W3 实际执行调整
+
+原计划中 W3 写了 “LangGraph + 工具调用 + 安全”，但结合 P2 的“只做 Context Engine 底座”红线，应做如下收敛：
+
+| 原计划项 | 调整后做法 | 原因 |
+|---|---|---|
+| LangGraph 核心、状态机、条件路由 | 只做最简状态机脚本和流程图，证明脱离框架也能解释；不深集成到 P2 主链路 | 防止 P2 变成 Agent 项目 |
+| Tool Calling | 只做查询型工具：`query_ott_status`、`query_elderly_record`、`query_device_log` | P2 是 Context Engine，不做高危执行工具 |
+| SandboxExecutor | 保留接口抽象和危险输入拦截演示，不做复杂沙箱平台 | P2 只需要证明安全意识，E2B/Docker 深化留给 P1 |
+| Trace / LangSmith | 只做一次请求的 trace-id 贯穿：Java -> Python -> Retriever -> Response | 不做完整可观测平台 |
+| Multi-Query | 小实验，记录命中率变化；不做 Query Rewrite 平台 | 防止检索优化失控 |
+
+W2-W3 的最高优先级交付应是：
+
+1. Java Spring AI 入口能调用 Python Context Runtime。
+2. Python 能加载 OTT / 养老 / TMS 三类知识并返回带引用的上下文。
+3. 评估脚本能输出 Faithfulness、Context Precision、Recall@K 或自定义替代指标。
+4. Prompt 注入和隐私攻击样例有真实拦截率。
+5. Docker Compose 能一键启动 Java、Python、Qdrant、Redis。
+6. README 能讲清：这是 Context Engine，不是业务平台。
+
+### 9.5 Phase0 到 P2 的复用边界
+
+| Phase0 产物 | P2 复用方式 | 禁止事项 |
+|---|---|---|
+| Day1 Pydantic / FastAPI 输入契约 | 复用“严格输入契约”思想；Python Runtime 可参考 schema 风格 | 不直接搬 Day1 FastAPI 项目 |
+| Day2 Provider / Token Budget | 复用 provider contract、预算意识和 retry 分类话术 | 不做预算平台 |
+| Day3 ReAct 状态机 | 复用“证据不能绕过安全判断”和 tool observation 思想 | 不把 P2 做成 Agent 主项目 |
+| Day4 RAG Pipeline | 复用数据加载、切片、eval set 和 fallback 思路 | 不覆盖 Day4 baseline |
+| Day5 Hybrid/Reranker | 复用 Dense + Sparse + alpha + MockReranker 的实验路线 | 不把 Reranker 当单点依赖 |
+| Day6 Survival Gate | 复用可解释输出、fallback_reason、trace、metrics 报告风格 | 不把 Day6 TMS Agent 原型搬成 P2 主链路 |
+
+### 9.6 面试叙事
+
+P2 的推荐 30 秒话术：
+
+```text
+P2 我没有扩成 OTT 或养老业务系统，而是严格做 Context Engine 底座。
+Java 侧用 Spring Boot / Spring AI 做企业接入入口，提供 Controller、Swagger 和 ChatClient/Advisor 调用样例；
+Python 侧负责真正的 Context Runtime，包括文档切片、Hybrid Retrieval、Reranker、RAGAS/自定义评估、Prompt 注入防御和 Redis Session Context。
+两侧通过 REST/gRPC 解耦，Java 保留企业工程优势，Python 利用 AI 生态效率。
+这个项目证明我能把 Java 存量系统和 AI 检索上下文能力结合起来，而不是只写一个 Python RAG Demo。
+```
+
 如果为了短期连续性继续放在本仓库，也必须新建独立目录并明确标注实验性质，不能污染 Day1-Day6 原型和测试基线。
 
 ## 10. 下一会话推荐读取顺序
@@ -240,4 +351,3 @@ v20-p2-context-engine/
 Phase 0 W1 通过。  
 下一步进入 Phase 1 / P2 Context Engine。  
 执行时必须保持收敛：只做 Context Engine 底座，不扩张为复杂业务系统。
-
